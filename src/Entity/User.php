@@ -3,7 +3,10 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class), ORM\Table(name:"users") ]
 class User
@@ -21,10 +24,21 @@ class User
     private ?string $email = null;
 
     #[ORM\Column(length: 255)]
+    private ?string $role = null;
+
+    #[ORM\Column(length: 255)]
     private ?string $password = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $created_at = null;
+
+    #[ORM\OneToMany(mappedBy: 'created_by_user_id', targetEntity: Article::class)]
+    private Collection $category_id;
+
+    public function __construct()
+    {
+        $this->category_id = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -55,6 +69,18 @@ class User
         return $this;
     }
 
+    public function getRole(): ?string
+    {
+        return $this->role;
+    }
+
+    public function setRole(string $role): self
+    {
+        $this->role = $role;
+
+        return $this;
+    }
+
     public function getPassword(): ?string
     {
         return $this->password;
@@ -76,6 +102,34 @@ class User
     {
         $this->created_at = $created_at;
 
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Article>
+     */
+    public function getCategoryId(): Collection
+    {
+        return $this->category_id;
+    }
+
+    public function addCategoryId(Article $categoryId): self
+    {
+        if (!$this->category_id->contains($categoryId)) {
+            $this->category_id->add($categoryId);
+            $categoryId->setCreatedByUserId($this);
+        }
+        return $this;
+    }
+
+    public function removeCategoryId(Article $categoryId): self
+    {
+        if ($this->category_id->removeElement($categoryId)) {
+            // set the owning side to null (unless already changed)
+            if ($categoryId->getCreatedByUserId() === $this) {
+                $categoryId->setCreatedByUserId(null);
+            }
+        }
         return $this;
     }
 }

@@ -30,6 +30,20 @@ class UserRepository extends ServiceEntityRepository
         }
     }
 
+    public function saveUser($name, $email, $role, $password)
+    {
+        $newUser = new User();
+
+        $newUser
+            ->setname($name)
+            ->setEmail($email)
+            ->setRole($role)
+            ->setPassword($password);
+
+        $this->getEntityManager()->persist($newUser);
+        $this->getEntityManager()->flush();
+    }
+
     public function remove(User $entity, bool $flush = false): void
     {
         $this->getEntityManager()->remove($entity);
@@ -37,6 +51,37 @@ class UserRepository extends ServiceEntityRepository
         if ($flush) {
             $this->getEntityManager()->flush();
         }
+    }
+
+    /**
+     * @return User[] Returns an array of User objects
+     */
+    public function findByColumn($column, $email): ?User
+    {
+        return $this->createQueryBuilder('symfony')
+            ->andWhere('symfony.'.$column.' = :val')
+            ->setParameter('val', $email)
+            ->getQuery()
+            ->getOneOrNullResult()
+            ;
+    }
+
+    /**
+     * @param User $user
+     * @return User
+     */
+    public function updateUser(User $user): User
+    {
+        $this->getEntityManager()->persist($user);
+        $this->getEntityManager()->flush();
+
+        return $user;
+    }
+
+    public function removeUser(User $user)
+    {
+        $this->getEntityManager()->remove($user);
+        $this->getEntityManager()->flush();
     }
 
 //    /**
