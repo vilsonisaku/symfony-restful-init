@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
@@ -52,6 +53,7 @@ class UserController extends AbstractController
         $user->setEmail($email);
         $user->setRole($role);
         $user->setPassword($password);
+        $user->setCreatedAt( new \DateTimeImmutable() );
 
         $entityManager = $this->doctrine->getManager();
 
